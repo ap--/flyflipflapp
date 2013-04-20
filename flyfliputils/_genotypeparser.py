@@ -63,12 +63,20 @@ class GenotypeParser(object):
         chromosomes = [ m.group('firstChromosome'),
                         m.group('secondChromosome'),
                         m.group('thirdChromosome') ]
-        
-        return {i+1:c for i,c in enumerate(chromosomes)}
+        cs = {}
+        for i,c in enumerate(chromosomes):
+            _tmp = sorted(map(lambda x: x.strip(), c.split('/')))
+            homozygous = False if len(_tmp) == 2 else True
+            cs[i+1] = {}
+            cs[i+1]['homozygous'] = homozygous
+            cs[i+1]['allele0'] = _tmp[0]
+            cs[i+1]['allele1'] = _tmp[0 if homozygous else 1]
+
+        return cs
             
 
     def parse(self):
-        ret = collections.OrderedDict()
+        ret = {}
         ret['type'] = 'cross' if self.isCross() else 'stock'
         ret['fly0'] = {'gender' : self.getGender(0),
                        'genotype': self.getGenotype(0)}
@@ -93,21 +101,13 @@ genotype_tests = [
 
 if __name__ == '__main__':
 
+    import pprint
+
     for g in genotype_tests:
         print '>> parse', g, '?'
         d = GenotypeParser(g).parse()
         print '------------------------------------'
-        print 'type: %s' % d['type']
-        print 'fly0: gender:   %s' % d['fly0']['gender']
-        print '      genotype: 1: %s' % d['fly0']['genotype'][1]
-        print '                2: %s' % d['fly0']['genotype'][2]
-        print '                3: %s' % d['fly0']['genotype'][3]
-        print 'fly1: gender:   %s' % d['fly1']['gender']
-        print '      genotype: 1: %s' % d['fly1']['genotype'][1]
-        print '                2: %s' % d['fly1']['genotype'][2]
-        print '                3: %s' % d['fly1']['genotype'][3]
-        print ''
-
+        pprint.pprint(d)
 
 
 
