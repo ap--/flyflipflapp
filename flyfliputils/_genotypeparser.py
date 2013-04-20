@@ -95,6 +95,11 @@ class GenotypeParser(object):
             ret['fly1'] = ret['fly0']
         return ret
 
+    
+    def getlongidentifier(self):
+        # XXX make this better
+        return self.string.replace('XXX', 'X')
+
 
     def getshortidentifier(self):
         """This function tries to return a short identifier for the stock or cross.
