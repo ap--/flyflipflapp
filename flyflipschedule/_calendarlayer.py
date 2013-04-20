@@ -8,6 +8,8 @@ import oauth2client.client
 import oauth2client.file
 import oauth2client.tools
 
+import datetime
+
 
 class GCalendar(object):
         
@@ -87,7 +89,58 @@ class GCalendar(object):
                 return
 
 
+    def addflyevent(self, type_, shortid, longid, temperature, date):
+        start = date
+        
 
+        if type_ == 'stock':
+            if temperature == 25:
+                rec = u'RRULE:FREQ=DAILY;INTERVAL=14'
+                end = start + datetime.timedelta(days=14)
+            elif temperature == 18:
+                rec = u'RRULE:FREQ=DAILY;INTERVAL=28'
+                end = start + datetime.timedelta(days=28)
+            else:
+                raise Exception('unkown temperature')
+            start = start.strftime('%Y-%m-%d')
+            end = end.strftime('%Y-%m-%d')
+
+            event = {
+                'summary': 'Stock %s' % shortid,
+                'start': { 'date': start,
+                           'timeZone': self.FCTIMEZONE },
+                'end': { 'date': end,
+                         'timeZone': self.FCTIMEZONE },
+                'description' : '%s %dC' % (longid, temperature),
+                'recurrence' : [rec],
+                'location' : 'Vienna',
+                    }
+            if self._debug > 0: print '> adding stock %s' % shortid
+        elif type_ == 'cross':
+            if temperature == 25:
+                end = start + datetime.timedelta(days=14)
+            elif temperature == 18:
+                end = start + datetime.timedelta(days=28)
+            else:
+                raise Exception('unkown temperature')
+            start = start.strftime('%Y-%m-%d')
+            end = end.strftime('%Y-%m-%d')
+
+            event = {
+                'summary': 'Cross %s' % shortid,
+                'start': { 'date': start,
+                           'timeZone': self.FCTIMEZONE },
+                'end': { 'date': end,
+                         'timeZone': self.FCTIMEZONE },
+                'description' : '%s %dC' % (longid, temperature),
+                'location' : 'Vienna',
+                    }
+            if self._debug > 0: print '> adding cross %s' % shortid
+        else:
+            raise Exception('type needs to be stock or cross')
+
+        self.service.events().insert(calendarId=self.calendarId,
+                                         body=event).execute()
 
 
 
