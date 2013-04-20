@@ -20,6 +20,8 @@ class GCalendar(object):
         self._credentials = self._getcredentials(client_secrets, storagefile)
         http = self._credentials.authorize(httplib2.Http())
         self.service = apiclient.discovery.build('calendar', 'v3', http=http)
+    
+        self.calendarId = self.getflycalendarid()
 
 
     def _getcredentials(self, secrets, store):
@@ -40,13 +42,15 @@ class GCalendar(object):
 
     def _findflycalendarid(self):
         if self._debug > 0: print '> searching flycalendar'
+        page_token=None
         while True:
-            clist = self.service.calendarList().list(pageToken=None).execute()
+            clist = self.service.calendarList().list(pageToken=page_token).execute()
             if clist['items']:
                 for clist_entry in clist['items']:
                     if clist_entry['summary'] == self.FCSUMMARY:
                         return clist_entry['id']
-            if not clist.get('nextPageToken'):
+            page_token = clist.get('nextPageToken')
+            if not page_token:
                 return None
 
 
@@ -64,5 +68,28 @@ class GCalendar(object):
         if _id is None:
             _id = self._addflycalendar()
         return _id
+
+
+    def iterflyevents(self):
+        page_token = None
+        while True:
+            events = self.service.events().list(calendarId=self.calendarId,
+                                                pageToken=page_token).execute()
+            try:
+                events['items']
+            except KeyError:
+                return
+            if events['items']:
+                for event in events['items']:
+                    yield event
+            page_token = events.get('nextPageToken')
+            if not page_token:
+                return
+
+
+
+
+
+
 
 

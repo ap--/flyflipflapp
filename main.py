@@ -12,3 +12,8 @@ if __name__ == '__main__':
     cal = flyflipschedule.GCalendar(CLIENT_SECRETS, STORAGEFILE)
 
     print cal.getflycalendarid()
+
+    for event in cal.iterflyevents():
+        for k,v in event.iteritems():
+            print k, v
+        print ''
