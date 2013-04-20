@@ -60,7 +60,9 @@ class GCalendar(object):
         if self._debug > 0: print '> adding flycalendar'
         cl = { 'summary'     : self.FCSUMMARY,
                'description' : self.FCDESCRIPTION,
-               'timeZone'    : self.FCTIMEZONE }
+               'timeZone'    : self.FCTIMEZONE,
+               'reminders'   : {'useDefault' : False},
+               'defaultReminders' : []}
         ret = self.service.calendars().insert(body=cl).execute()
         return ret['id']
 
@@ -114,6 +116,10 @@ class GCalendar(object):
                 'description' : '%s %dC' % (longid, temperature),
                 'recurrence' : [rec],
                 'location' : 'Vienna',
+                'reminders' : { 'useDefault' : False,
+                                'overrides' : [{'method' : 'email',
+                                                'minutes': 24*60, }],
+                              },
                     }
             if self._debug > 0: print '> adding stock %s' % shortid
         elif type_ == 'cross':
