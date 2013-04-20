@@ -88,14 +88,88 @@ class GenotypeParser(object):
         return ret
 
 
+    def getshortidentifier(self):
+        """This function tries to return a short identifier for the stock or cross.
+
+        it is not garantied to be unique, or readable :)
+        """
+        gt = self.parse()
+        if gt['type'] == 'stock':
+            return self._getshortidentifierfromfly(gt['fly0'])
+        elif gt['type'] == 'cross':
+            return ( self._getshortidentifierfromfly(gt['fly0']) + ' X ' +
+                     self._getshortidentifierfromfly(gt['fly1']) )
+
+
+        
+    def _getshortidentifierfromfly(self, gt):
+        # just use 2nd and 3rd chromosome
+        alleles2 = [ gt['genotype'][2]['allele0'],
+                     gt['genotype'][2]['allele1'] ]
+        alleles3 = [ gt['genotype'][3]['allele0'],
+                     gt['genotype'][3]['allele1'] ]
+        homozyg2 = gt['genotype'][2]['homozygous']
+        homozyg3 = gt['genotype'][3]['homozygous']
+        
+        # get important alleles
+        if homozyg2:
+            C2 = alleles2[0]
+        else:
+            C2 = alleles2[0] if alleles2[1] == 'cyo' else alleles2[1]
+        if homozyg3:
+            C3 = alleles3[0]
+        else:
+            C3 = alleles3[0] if alleles3[1] == 'Tm3ser' else alleles3[1]
+      
+        #print ''
+        #print 'C2> %s' % C2
+        #print 'C3> %s' % C3
+        #print ''
+
+
+        # check if double balanced
+        db = ''
+        if ( (set(alleles3) == set(['sb','Tm3ser'])) and
+                homozyg2 or ('cyo' in alleles2) ):
+            db = 'db'
+        if ( (set(alleles2) == set(['if','cyo'])) and
+                homozyg3 or ('Tm3ser' in alleles3) ):
+            db = 'db'
+        if ( ('cyo' in alleles2) and ('Tm3ser' in alleles3) ):
+            db = 'db'
+
+        # shorten alleles:
+        m = re.match(self.SGTRE, C2)
+        if m:
+            c2i = m.group('ident')
+        else:
+            # XXX try to find better fallback
+            c2i = C2[:3]
+        m = re.match(self.SGTRE, C3)
+        if m:
+            c3i = m.group('ident')
+        else:
+            # XXX try to find better fallback
+            c3i = C3[:3]
+        
+        if c2i:
+            c2i += '2'
+        if c3i:
+            c3i += '3'
+        out = '%s%s%s' % (c2i, c3i, db)
+        if not out:
+            out = 'WT'
+        
+        return out
 
 
 genotype_tests = [
     u'; + / + ; + / + ;',
-    u'w+ ; FOO-Bar1 ; Foo-Bar1::BAZ42 / cyo ;',
-    u'w+::(13) ; BAR-Foo ; BAR-Foo::baz2,FOO-Bar / cyo ;',
-    u'w- ; + ; BAR-Foo1::BAZ42 / cyo ;'
-    u'w- ; FOO-Bar / cyo ; BarFoo-Baz1 / Tm3ser ; \u2642 XXX w+; if / cyo; Foo-BAR1 ; \u263f'
+    u'w+ ; FOO-Bar / cyo ; sb / Tm3ser ;',
+    u'w+ ; BAR-FooB2 ; ;',
+    u'w- ; ; BAR-Foo1::BAZ42 ;',
+    u'w- ; FOO-Bar / cyo ; BAR-Foo / Tm3ser ;',
+    u'w- ; FOO-Bar ; BAR-Baz1 ; \u2642 XXX w+; if / cyo; Foo-BAR1 ; \u263f'
     ]
 
 
