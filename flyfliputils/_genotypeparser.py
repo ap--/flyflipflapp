@@ -20,6 +20,12 @@ class GenotypeParser(object):
     SFRE = re.compile(u"\u2640")
     SMRE = re.compile(u"\u2642")
 
+    SGTRE = re.compile(r"""[a-zA-Z0-9+():]*         # match
+                           [-]*                     # 
+                           (?P<ident>[A-Z]*[a-z]*)  # used as identifier
+                           """, re.VERBOSE)
+
+
     def __init__(self, string):
         self.string = string
 
@@ -66,6 +72,8 @@ class GenotypeParser(object):
         cs = {}
         for i,c in enumerate(chromosomes):
             _tmp = sorted(map(lambda x: x.strip(), c.split('/')))
+            if len(_tmp) == 2 and _tmp[0] == _tmp[1]:
+                _tmp = [_tmp[0]]
             homozygous = False if len(_tmp) == 2 else True
             cs[i+1] = {}
             cs[i+1]['homozygous'] = homozygous
@@ -179,9 +187,11 @@ if __name__ == '__main__':
 
     for g in genotype_tests:
         print '>> parse', g, '?'
-        d = GenotypeParser(g).parse()
+        gg = GenotypeParser(g)
+        d = gg.parse()
+        print '>> short: %s' % gg.getshortidentifier()
         print '------------------------------------'
         pprint.pprint(d)
-
+        print ''
 
 
