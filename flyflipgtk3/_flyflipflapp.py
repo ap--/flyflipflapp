@@ -11,8 +11,8 @@ GObject.threads_init()
 Gdk.threads_init()
 
 
-def fprnt(t, d):
-    print t, d.strftime('# %Y-%m-%d %H:%M')
+def fprnt(tube, temperature, date):
+    print tube, u'  @%d\u00b0C' % temperature, date.strftime('# %Y-%m-%d %H:%M')
 
 
 class Gtk3FlyFlipFlapp(object):
@@ -44,6 +44,7 @@ class Gtk3FlyFlipFlapp(object):
 
         # get type selector and dateentry
         self._cbox_tubetype = b.get_object("tubetypecbox")
+        self._cbox_temp = b.get_object("flytemp")
         self._entry_date = b.get_object("dateentry")
         
         # get fly0 stuff
@@ -217,14 +218,16 @@ class Gtk3FlyFlipFlapp(object):
     def parse(self, *args):
         if self._is_date_valid():
             dat = self._entry_date.get_text()
-            t = datetime.datetime.strptime(dat.strip(), self.TIMEFMT)
+            dat = datetime.datetime.strptime(dat.strip(), self.TIMEFMT)
+            tmp = int(self._cbox_temp.get_model().get_value(
+                            self._cbox_temp.get_active_iter(),0))
             typ = self._cbox_tubetype.get_model().get_value(
                             self._cbox_tubetype.get_active_iter(),0)
             if typ == 'Stock':
-                self._parsefunc(self._get_fly_string(0), t)
+                self._parsefunc(self._get_fly_string(0), tmp, dat)
             elif typ == 'Cross':
                 self._parsefunc('%s XXX %s' % (self._get_fly_string(0),
-                                      self._get_fly_string(1)), t)
+                                self._get_fly_string(1)), tmp, dat)
         
 
     def _request_close(self, *args):
