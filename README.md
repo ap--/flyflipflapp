@@ -12,7 +12,7 @@ initial development started.
 * [done] get abstraction layer for new google calendar api (v3) up and running
 * fine tune addflyevent
 * [done] add reminders!
-* write gtk3 app
+* [done] write gtk3 app
 * write android app for simple flystock managing
 
 ### Notes
