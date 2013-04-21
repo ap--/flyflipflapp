@@ -15,3 +15,7 @@ initial development started.
 * write gtk3 app
 * write android app for simple flystock managing
 
+### Notes
+
+* the reminder system works fine for stocks (recurringEvents). But since google doesn't support reminders after an event started, the only way to get the right behaviour is to add specific events for crosses...
+
