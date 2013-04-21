@@ -7,6 +7,9 @@ from gi.repository import Gtk, GLib, GObject, Gdk
 
 import datetime
 
+import os
+import inspect
+
 GObject.threads_init()
 Gdk.threads_init()
 
@@ -28,7 +31,8 @@ class Gtk3FlyFlipFlapp(object):
 
         # GTK3 stuff
         b = Gtk.Builder()
-        guifile = 'main.ui'
+        PATH = os.path.dirname(inspect.getfile(Gtk3FlyFlipFlapp))
+        guifile = os.path.join(PATH, 'main.ui')
         b.add_from_file(guifile)
         b.connect_signals(self)
         self.w = b.get_object("window1")

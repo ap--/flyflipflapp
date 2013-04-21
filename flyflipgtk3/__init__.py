@@ -1,2 +1,2 @@
 
-from _flyflipflapp import FlyFlipFlapp
+from _flyflipflapp import Gtk3FlyFlipFlapp
