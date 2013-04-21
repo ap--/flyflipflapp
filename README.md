@@ -5,14 +5,15 @@ a gtk3 fly flipping scheduler with a google calendar backend.
 
 ### current state
 
-initial development started.
+it's working!
 
 ### TODO
 
 * [done] get abstraction layer for new google calendar api (v3) up and running
-* fine tune addflyevent
 * [done] add reminders!
 * [done] write gtk3 app
+* fine tune ./flyflipgtk3/\_flyflipapp.py/Gtk3FlyFlipFlapp.addflyevent
+* move reminders to a second calendar!
 * write android app for simple flystock managing
 
 ### Notes
