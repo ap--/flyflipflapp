@@ -125,6 +125,7 @@
           <object class="GtkGrid" id="fly0grid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="column_spacing">5</property>
             <child>
               <object class="GtkLabel" id="label9">
                 <property name="visible">True</property>
@@ -368,6 +369,7 @@
           <object class="GtkGrid" id="fly1grid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="column_spacing">5</property>
             <child>
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
@@ -611,6 +613,7 @@
           <object class="GtkBox" id="box3">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="homogeneous">True</property>
             <child>
               <object class="GtkButton" id="clearbutton">
                 <property name="label" translatable="yes">clear</property>

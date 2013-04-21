@@ -51,6 +51,7 @@ class UI:
         self._fly0_c3a = b.get_object("fly0c3a")
         self._fly0_c3b = b.get_object("fly0c3b")
         self._fly0_gen = b.get_object("fly0gender") 
+        self._fly1_gen = b.get_object("fly1gender") 
         
         # get fly1 stuff
         self._fly1_hc1 = b.get_object("fly1hc1")
@@ -83,9 +84,8 @@ class UI:
         self._grid_fly0.set_sensitive(False)
         self._grid_fly1.set_sensitive(False)
 
-
         self._setup_alleles(self.ALLELESCONF)
-
+        self._setup_genders()
         # done
         self.w.show_all()
 
@@ -126,28 +126,23 @@ class UI:
         return True
 
 
-    def _clicked_clear(self, button):
-
-        self._fly0_hc1.set_active(False)
-        self._fly0_hc2.set_active(False)
-        self._fly0_hc3.set_active(False)
-        self._fly1_hc1.set_active(False)
-        self._fly1_hc2.set_active(False)
-        self._fly1_hc3.set_active(False)
-        self._fly0_c1a.set_active(-1)
-        self._fly0_c1b.set_active(-1)
-        self._fly0_c2a.set_active(-1)
-        self._fly0_c2b.set_active(-1)
-        self._fly0_c3a.set_active(-1)
-        self._fly0_c3b.set_active(-1)
-        self._fly0_gen.set_active(-1)
-        self._fly1_c1a.set_active(-1)
-        self._fly1_c1b.set_active(-1)
-        self._fly1_c2a.set_active(-1)
-        self._fly1_c2b.set_active(-1)
-        self._fly1_c3a.set_active(-1)
-        self._fly1_c3b.set_active(-1)
-        self._fly1_gen.set_active(-1)
+    def _clicked_clear(self, button, fly=-1):
+        H0 = [self._fly0_hc1, self._fly0_hc2, self._fly0_hc3]
+        H1 = [self._fly1_hc1, self._fly1_hc2, self._fly1_hc3]
+        C0 = [self._fly0_c1a, self._fly0_c1b, self._fly0_c2a,
+              self._fly0_c2b, self._fly0_c3a, self._fly0_c3b]
+        C1 = [self._fly1_c1a, self._fly1_c1b, self._fly1_c2a,
+              self._fly1_c2b, self._fly1_c3a, self._fly1_c3b]
+        if fly < 0 or fly == 0:
+            for h in H0:
+                h.set_active(False)
+            for c in C0:
+                c.set_active(-1)
+        if fly < 0 or fly == 1:
+            for h in H1:
+                h.set_active(False)
+            for c in C1:
+                c.set_active(-1)
         return True
 
 
@@ -169,8 +164,20 @@ class UI:
                 cb.add_attribute(cell, "text", 0)
         return         
 
+
     def _setup_genders(self):
-        pass
+        ls = Gtk.ListStore(str)
+        ls.append([u'\u2640'])
+        ls.append([u'\u2642'])
+        ls.append([u'\u263f'])
+        cell = Gtk.CellRendererText()
+        for cb in [self._fly0_gen, self._fly1_gen]:
+            cb.set_model(ls)
+            cb.set_active(-1)
+            cb.pack_start(cell, True)
+            cb.add_attribute(cell, "text", 0)
+        return
+
 
     def _request_close(self, *args):
         Gtk.main_quit()
