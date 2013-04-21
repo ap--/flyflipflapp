@@ -14,7 +14,7 @@ GObject.threads_init()
 Gdk.threads_init()
 
 
-class UI:
+class UI(object):
 
     ALLELESCONF = '../alleles.yaml'
     TIMEFMT = '%Y-%m-%d %H:%M'
@@ -67,12 +67,17 @@ class UI:
         # connect all signals:
         self.w.connect("delete-event", self._request_close)
 
-        self._fly0_hc1.connect("clicked", self._changed_homozygous, self._fly0_c1b)
-        self._fly0_hc2.connect("clicked", self._changed_homozygous, self._fly0_c2b)
-        self._fly0_hc3.connect("clicked", self._changed_homozygous, self._fly0_c3b)
-        self._fly1_hc1.connect("clicked", self._changed_homozygous, self._fly1_c1b)
-        self._fly1_hc2.connect("clicked", self._changed_homozygous, self._fly1_c2b)
-        self._fly1_hc3.connect("clicked", self._changed_homozygous, self._fly1_c3b)
+        self._fly0_hc1.connect("clicked", self._changed_homozygous, '_fly0_c1')
+        self._fly0_hc2.connect("clicked", self._changed_homozygous, '_fly0_c2')
+        self._fly0_hc3.connect("clicked", self._changed_homozygous, '_fly0_c3')
+        self._fly1_hc1.connect("clicked", self._changed_homozygous, '_fly1_c1')
+        self._fly1_hc2.connect("clicked", self._changed_homozygous, '_fly1_c2')
+        self._fly1_hc3.connect("clicked", self._changed_homozygous, '_fly1_c3')
+
+        self._fly0_c2a.connect("changed", self._changed_allele, self._fly0_c2b)
+        self._fly0_c3a.connect("changed", self._changed_allele, self._fly0_c3b)
+        self._fly1_c2a.connect("changed", self._changed_allele, self._fly1_c2b)
+        self._fly1_c3a.connect("changed", self._changed_allele, self._fly1_c3b)
 
         self._cbox_tubetype.connect("changed", self._changed_tubetype)
 
@@ -90,9 +95,11 @@ class UI:
         self.w.show_all()
 
 
-    def _changed_homozygous(self, checkbutton, combobox):
+    def _changed_homozygous(self, checkbutton, cbn):
         MODC1 = not checkbutton.get_active()
-        combobox.set_sensitive(MODC1)
+        cNa, cNb = self.__getattribute__(cbn+'a'), self.__getattribute__(cbn+'b')
+        cNb.set_active(cNa.get_active())
+        cNb.set_sensitive(MODC1)
         return True
 
 
@@ -104,6 +111,12 @@ class UI:
         elif typ == 'Cross':
             self._grid_fly0.set_sensitive(True)
             self._grid_fly1.set_sensitive(True)
+        return True
+
+    
+    def _changed_allele(self, cNa, cNb):
+        if not cNb.get_sensitive():
+            cNb.set_active(cNa.get_active())
         return True
 
 
@@ -134,15 +147,11 @@ class UI:
         C1 = [self._fly1_c1a, self._fly1_c1b, self._fly1_c2a,
               self._fly1_c2b, self._fly1_c3a, self._fly1_c3b]
         if fly < 0 or fly == 0:
-            for h in H0:
-                h.set_active(False)
-            for c in C0:
-                c.set_active(-1)
+            for h in H0+C0:
+                h.set_active(0)
         if fly < 0 or fly == 1:
-            for h in H1:
-                h.set_active(False)
-            for c in C1:
-                c.set_active(-1)
+            for h in H1+H1:
+                h.set_active(0)
         return True
 
 
@@ -159,7 +168,7 @@ class UI:
                 ls.append([allele])
             for cb in cbs:
                 cb.set_model(ls)
-                cb.set_active(-1)
+                cb.set_active(0)
                 cb.pack_start(cell, True)
                 cb.add_attribute(cell, "text", 0)
         return         
@@ -167,13 +176,14 @@ class UI:
 
     def _setup_genders(self):
         ls = Gtk.ListStore(str)
+        ls.append([u' '])
         ls.append([u'\u2640'])
         ls.append([u'\u2642'])
         ls.append([u'\u263f'])
         cell = Gtk.CellRendererText()
         for cb in [self._fly0_gen, self._fly1_gen]:
             cb.set_model(ls)
-            cb.set_active(-1)
+            cb.set_active(0)
             cb.pack_start(cell, True)
             cb.add_attribute(cell, "text", 0)
         return
