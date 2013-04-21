@@ -15,7 +15,7 @@ def fprnt(t, d):
     print t, d.strftime('# %Y-%m-%d %H:%M')
 
 
-class UI(object):
+class Gtk3FlyFlipFlapp(object):
 
 
     def __init__(self, 
@@ -237,5 +237,5 @@ class UI(object):
 
 if __name__ == "__main__":
 
-    u = UI()
+    u = Gtk3FlyFlipFlapp()
     u.start()
