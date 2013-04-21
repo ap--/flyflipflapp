@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+
+import flyflipgtk3
+import flyfliputils
+import flyflipschedule
+
+
+if __name__ == '__main__':
+
+    CLIENT_SECRETS = 'client_secrets.json'
+    STORAGEFILE = 'secrets_storage.dat'
+
+    cal = flyflipschedule.GCalendar(CLIENT_SECRETS, STORAGEFILE, debug=2)
+    print cal.getflycalendarid()
+
+    def send2calendar(gt, temperature, date):
+        tube = flyfliputils.flytuplefromgenotype(gt) + (temperature, date,)
+        cal.addflyevent(*tube)
+
+    UI = flyflipgtk3.Gtk3FlyFlipFlapp(parsefunc=send2calendar,
+                                      allelesconf='./alleles.yaml')
+    UI.start()
+    
