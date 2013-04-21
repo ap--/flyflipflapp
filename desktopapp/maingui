@@ -2,24 +2,30 @@
 #
 
 import yaml
-import os
-import threading
 
 from gi.repository import Gtk, GLib, GObject, Gdk
 
 import datetime
-import time
 
 GObject.threads_init()
 Gdk.threads_init()
 
 
+def fprnt(t, d):
+    print t, d.strftime('# %Y-%m-%d %H:%M')
+
+
 class UI(object):
 
-    ALLELESCONF = '../alleles.yaml'
-    TIMEFMT = '%Y-%m-%d %H:%M'
 
-    def __init__(self):
+    def __init__(self, 
+            parsefunc=fprnt,
+            allelesconf='../alleles.yaml', timefmt='%Y-%m-%d %H:%M'):
+
+        self._parsefunc = parsefunc
+        self.ALLELESCONF = allelesconf
+        self.TIMEFMT = timefmt
+
         # GTK3 stuff
         b = Gtk.Builder()
         guifile = 'main.ui'
@@ -79,6 +85,7 @@ class UI(object):
 
         self._button_now.connect("clicked", self._clicked_now, self._entry_date)
         self._button_clear.connect("clicked", self._clicked_clear)
+        self._button_add.connect("clicked", self.parse)
 
         self._grid_fly0.set_sensitive(False)
         self._grid_fly1.set_sensitive(False)
@@ -184,6 +191,41 @@ class UI(object):
             cb.add_attribute(cell, "text", 0)
         return
 
+    
+    def _is_date_valid(self):
+        ICON = self._entry_date.get_icon_stock(Gtk.EntryIconPosition.PRIMARY)
+        return ICON == Gtk.STOCK_APPLY    
+
+
+    def _get_fly_string(self, index):
+        def get_text(fly, cbi):
+            cb = self.__getattribute__('_fly%d_%s' % (fly, cbi))
+            return cb.get_model().get_value(cb.get_active_iter(),0)
+        s = '; %s / %s ; %s / %s ;' % (get_text(index,'c2a'), 
+                                       get_text(index,'c2b'),
+                                       get_text(index,'c3a'),
+                                       get_text(index,'c3b'))
+        c1 = get_text(index,'c1a')             
+        g = get_text(index, 'gen')
+        if c1.strip():
+            s = '%s %s' % (c1, s)
+        if g.strip():
+            s = '%s %s' % (s, g)
+        return s
+
+
+    def parse(self, *args):
+        if self._is_date_valid():
+            dat = self._entry_date.get_text()
+            t = datetime.datetime.strptime(dat.strip(), self.TIMEFMT)
+            typ = self._cbox_tubetype.get_model().get_value(
+                            self._cbox_tubetype.get_active_iter(),0)
+            if typ == 'Stock':
+                self._parsefunc(self._get_fly_string(0), t)
+            elif typ == 'Cross':
+                self._parsefunc('%s XXX %s' % (self._get_fly_string(0),
+                                      self._get_fly_string(1)), t)
+        
 
     def _request_close(self, *args):
         Gtk.main_quit()
