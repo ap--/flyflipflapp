@@ -122,16 +122,24 @@ class GCalendar(object):
                               },
                     }
             if self._debug > 0: print '> adding stock %s' % shortid
+            self.service.events().insert(calendarId=self.calendarId,
+                                         body=event).execute()
         elif type_ == 'cross':
             if temperature == 25:
+                # should hatch after 10 days
                 end = start + datetime.timedelta(days=14)
+                flip = start + datetime.timedelta(days=1)
+                vc = start + datetime.timedelta(days=12, hours=23)
             elif temperature == 18:
-                end = start + datetime.timedelta(days=28)
+                # should hatch after 20 days
+                end = start + datetime.timedelta(days=24)
+                flip = start + datetime.timedelta(days=1)
+                vc = start + datetime.timedelta(days=24, hours=23)
             else:
                 raise Exception('unkown temperature')
+            # Cross event
             start = start.strftime('%Y-%m-%d')
             end = end.strftime('%Y-%m-%d')
-
             event = {
                 'summary': 'Cross %s' % shortid,
                 'start': { 'date': start,
@@ -142,11 +150,51 @@ class GCalendar(object):
                 'location' : 'Vienna',
                     }
             if self._debug > 0: print '> adding cross %s' % shortid
+            self.service.events().insert(calendarId=self.calendarId,
+                                         body=event).execute()
+            # collect virgins starting at day ten
+            event = {
+                'summary': 'VIRGINS Cross %s' % shortid,
+                'start': { 'dateTime': vc.strftime('%Y-%m-%dT23:00:00'),
+                           'timeZone': self.FCTIMEZONE },
+                'end': { 'dateTime': vc.strftime('%Y-%m-%dT23:05:00'),
+                         'timeZone': self.FCTIMEZONE },
+                'description' : 'VIRGINS %s %dC' % (longid, temperature),
+                'location' : 'Vienna',
+                'reminders' : { 'useDefault' : False,
+                                'overrides' : [{'method' : 'email',
+                                                'minutes': 15*60, }, # day 14
+                                               {'method' : 'email',
+                                                'minutes': 39*60, }, # day 13
+                                               {'method' : 'email',
+                                                'minutes': 63*60, }, # day 12
+                                               {'method' : 'email',
+                                                'minutes': 87*60, }, # day 11
+                                              ],
+                              },
+                    }
+            self.service.events().insert(calendarId=self.calendarId,
+                                         body=event).execute()
+
+            # cross flip after day one
+            event = {
+                'summary': 'FLIP Cross %s' % shortid,
+                'start': { 'dateTime': flip.strftime('%Y-%m-%dT23:00:00'),
+                           'timeZone': self.FCTIMEZONE },
+                'end': { 'dateTime': flip.strftime('%Y-%m-%dT23:05:00'),
+                         'timeZone': self.FCTIMEZONE },
+                'description' : 'FLIP %s %dC' % (longid, temperature),
+                'location' : 'Vienna',
+                'reminders' : { 'useDefault' : False,
+                                'overrides' : [{'method' : 'email',
+                                                'minutes': 15*60, }],
+                              },
+                    }
+            self.service.events().insert(calendarId=self.calendarId,
+                                         body=event).execute()
         else:
             raise Exception('type needs to be stock or cross')
 
-        self.service.events().insert(calendarId=self.calendarId,
-                                         body=event).execute()
 
 
 
