@@ -41,11 +41,9 @@ class UI(object):
         self._entry_date = b.get_object("dateentry")
         
         # get fly0 stuff
-        self._fly0_hc1 = b.get_object("fly0hc1")
         self._fly0_hc2 = b.get_object("fly0hc2")
         self._fly0_hc3 = b.get_object("fly0hc3")
         self._fly0_c1a = b.get_object("fly0c1a")
-        self._fly0_c1b = b.get_object("fly0c1b")
         self._fly0_c2a = b.get_object("fly0c2a")
         self._fly0_c2b = b.get_object("fly0c2b")
         self._fly0_c3a = b.get_object("fly0c3a")
@@ -54,11 +52,9 @@ class UI(object):
         self._fly1_gen = b.get_object("fly1gender") 
         
         # get fly1 stuff
-        self._fly1_hc1 = b.get_object("fly1hc1")
         self._fly1_hc2 = b.get_object("fly1hc2")
         self._fly1_hc3 = b.get_object("fly1hc3")
         self._fly1_c1a = b.get_object("fly1c1a")
-        self._fly1_c1b = b.get_object("fly1c1b")
         self._fly1_c2a = b.get_object("fly1c2a")
         self._fly1_c2b = b.get_object("fly1c2b")
         self._fly1_c3a = b.get_object("fly1c3a")
@@ -67,10 +63,8 @@ class UI(object):
         # connect all signals:
         self.w.connect("delete-event", self._request_close)
 
-        self._fly0_hc1.connect("clicked", self._changed_homozygous, '_fly0_c1')
         self._fly0_hc2.connect("clicked", self._changed_homozygous, '_fly0_c2')
         self._fly0_hc3.connect("clicked", self._changed_homozygous, '_fly0_c3')
-        self._fly1_hc1.connect("clicked", self._changed_homozygous, '_fly1_c1')
         self._fly1_hc2.connect("clicked", self._changed_homozygous, '_fly1_c2')
         self._fly1_hc3.connect("clicked", self._changed_homozygous, '_fly1_c3')
 
@@ -140,24 +134,26 @@ class UI(object):
 
 
     def _clicked_clear(self, button, fly=-1):
-        H0 = [self._fly0_hc1, self._fly0_hc2, self._fly0_hc3]
-        H1 = [self._fly1_hc1, self._fly1_hc2, self._fly1_hc3]
-        C0 = [self._fly0_c1a, self._fly0_c1b, self._fly0_c2a,
-              self._fly0_c2b, self._fly0_c3a, self._fly0_c3b]
-        C1 = [self._fly1_c1a, self._fly1_c1b, self._fly1_c2a,
-              self._fly1_c2b, self._fly1_c3a, self._fly1_c3b]
+        HC0 = [self._fly0_hc2, self._fly0_hc3,
+               self._fly0_c1a, self._fly0_c2a,
+               self._fly0_c2b, self._fly0_c3a,
+               self._fly0_c3b, self._fly0_gen]
+        HC1 = [self._fly1_hc2, self._fly1_hc3,
+               self._fly1_c1a, self._fly1_c2a,
+               self._fly1_c2b, self._fly1_c3a,
+               self._fly1_c3b, self._fly1_gen]
         if fly < 0 or fly == 0:
-            for h in H0+C0:
+            for h in HC0:
                 h.set_active(0)
         if fly < 0 or fly == 1:
-            for h in H1+H1:
+            for h in HC1:
                 h.set_active(0)
         return True
 
 
     def _setup_alleles(self, configfile):
         alleles = yaml.load(open(configfile,'r'))
-        C1 = [self._fly0_c1a, self._fly0_c1b, self._fly1_c1a, self._fly1_c1b]
+        C1 = [self._fly0_c1a, self._fly1_c1a]
         C2 = [self._fly0_c2a, self._fly0_c2b, self._fly1_c2a, self._fly1_c2b]
         C3 = [self._fly0_c3a, self._fly0_c3b, self._fly1_c3a, self._fly1_c3b]
         KS = ['chromosome1', 'chromosome2', 'chromosome3']
