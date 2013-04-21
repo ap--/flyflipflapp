@@ -1,0 +1,23 @@
+#=====================================
+# setup all possible alleles 
+# in this config file
+
+{ 
+chromosome1 : [ 
+        'w+',
+        'w-',
+              ],
+chromosome2 : [ 
+        'FOO-Bar',
+        'BAZ-Foo::BAR',
+        'cyo',
+        'if',
+              ],
+chromosome3 : [ 
+        'Foo-Baz',
+        'BAR-Foo, Foo::13',
+        'Tm3ser',
+        'sb',
+              ],
+}
+

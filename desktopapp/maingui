@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 
-import json
+import yaml
 import os
 import threading
 
@@ -13,9 +13,11 @@ import time
 GObject.threads_init()
 Gdk.threads_init()
 
-TFMT = '%Y-%m-%d %H:%M'
 
 class UI:
+
+    ALLELESCONF = '../alleles.yaml'
+    TIMEFMT = '%Y-%m-%d %H:%M'
 
     def __init__(self):
         # GTK3 stuff
@@ -30,7 +32,8 @@ class UI:
         self._button_add = b.get_object("addbutton")
         self._button_clear = b.get_object("clearbutton")
         
-        # get fly1grid
+        # get fly grids
+        self._grid_fly0 = b.get_object("fly0grid")
         self._grid_fly1 = b.get_object("fly1grid")
 
         # get type selector and dateentry
@@ -59,7 +62,7 @@ class UI:
         self._fly1_c2b = b.get_object("fly1c2b")
         self._fly1_c3a = b.get_object("fly1c3a")
         self._fly1_c3b = b.get_object("fly1c3b")
-        
+       
         # connect all signals:
         self.w.connect("delete-event", self._request_close)
 
@@ -69,102 +72,112 @@ class UI:
         self._fly1_hc1.connect("clicked", self._changed_homozygous, self._fly1_c1b)
         self._fly1_hc2.connect("clicked", self._changed_homozygous, self._fly1_c2b)
         self._fly1_hc3.connect("clicked", self._changed_homozygous, self._fly1_c3b)
-        
-        
-        #self.b.connect("clicked", self.on_button)
-        
-        
-        #self.d = { 'date' : b.get_object("entry_date"),
-        #           'desc' : b.get_object("entry_desc"),
-        #           'geno' : b.get_object("combo_genotype"),
-        #           'aged' : b.get_object("spinbutton_flyage"),
-        #           'brain': b.get_object("entry_brain") }
 
-        #self.d['desc' ].connect("changed", self._check_if_empty)
-        #self.d['coel' ].connect("changed", self._check_time_format)
-        #self.d['brain'].connect("changed", self._check_time_format)
+        self._cbox_tubetype.connect("changed", self._changed_tubetype)
+
+        self._entry_date.connect("changed", self._changed_date)
+
+        self._button_now.connect("clicked", self._clicked_now, self._entry_date)
+        self._button_clear.connect("clicked", self._clicked_clear)
+
+        self._grid_fly0.set_sensitive(False)
+        self._grid_fly1.set_sensitive(False)
 
 
-        #self.d['coel'].set_text(now)
-        #self.d['brain'].set_text(now)
+        self._setup_alleles(self.ALLELESCONF)
 
+        # done
         self.w.show_all()
-        
-        #self._isready()        
+
 
     def _changed_homozygous(self, checkbutton, combobox):
         MODC1 = not checkbutton.get_active()
         combobox.set_sensitive(MODC1)
+        return True
+
+
+    def _changed_tubetype(self, combobox):
+        typ = combobox.get_model().get_value(combobox.get_active_iter(),0)
+        if typ == 'Stock':
+            self._grid_fly0.set_sensitive(True)
+            self._grid_fly1.set_sensitive(False)
+        elif typ == 'Cross':
+            self._grid_fly0.set_sensitive(True)
+            self._grid_fly1.set_sensitive(True)
+        return True
+
+
+    def _changed_date(self, entry):
+        string = entry.get_text()
+        try:
+            datetime.datetime.strptime(string.strip(), self.TIMEFMT)
+        except ValueError:
+            entry.set_icon_from_stock(
+                    Gtk.EntryIconPosition.PRIMARY, Gtk.STOCK_DIALOG_ERROR)
+        else:
+            entry.set_icon_from_stock(
+                    Gtk.EntryIconPosition.PRIMARY, Gtk.STOCK_APPLY)
+        return True
+
+
+    def _clicked_now(self, button, entry):
+        t = datetime.datetime.now().strftime(self.TIMEFMT)
+        entry.set_text(t)
+        return True
+
+
+    def _clicked_clear(self, button):
+
+        self._fly0_hc1.set_active(False)
+        self._fly0_hc2.set_active(False)
+        self._fly0_hc3.set_active(False)
+        self._fly1_hc1.set_active(False)
+        self._fly1_hc2.set_active(False)
+        self._fly1_hc3.set_active(False)
+        self._fly0_c1a.set_active(-1)
+        self._fly0_c1b.set_active(-1)
+        self._fly0_c2a.set_active(-1)
+        self._fly0_c2b.set_active(-1)
+        self._fly0_c3a.set_active(-1)
+        self._fly0_c3b.set_active(-1)
+        self._fly0_gen.set_active(-1)
+        self._fly1_c1a.set_active(-1)
+        self._fly1_c1b.set_active(-1)
+        self._fly1_c2a.set_active(-1)
+        self._fly1_c2b.set_active(-1)
+        self._fly1_c3a.set_active(-1)
+        self._fly1_c3b.set_active(-1)
+        self._fly1_gen.set_active(-1)
+        return True
+
+
+    def _setup_alleles(self, configfile):
+        alleles = yaml.load(open(configfile,'r'))
+        C1 = [self._fly0_c1a, self._fly0_c1b, self._fly1_c1a, self._fly1_c1b]
+        C2 = [self._fly0_c2a, self._fly0_c2b, self._fly1_c2a, self._fly1_c2b]
+        C3 = [self._fly0_c3a, self._fly0_c3b, self._fly1_c3a, self._fly1_c3b]
+        KS = ['chromosome1', 'chromosome2', 'chromosome3']
+        for k, cbs in zip(KS, [C1, C2, C3]):
+            ls = Gtk.ListStore(str)
+            cell = Gtk.CellRendererText()
+            for allele in alleles[k]:
+                ls.append([allele])
+            for cb in cbs:
+                cb.set_model(ls)
+                cb.set_active(-1)
+                cb.pack_start(cell, True)
+                cb.add_attribute(cell, "text", 0)
+        return         
+
+    def _setup_genders(self):
+        pass
 
     def _request_close(self, *args):
         Gtk.main_quit()
 
-    def _check_if_empty(self, entry):
-        if len(entry.get_text().strip()) != 0:
-            entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,
-                                        Gtk.STOCK_APPLY)
-        else:
-            entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,
-                                        Gtk.STOCK_APPLY)
-        self._isready()
-
-    def _check_time_format(self, entry):
-        string = entry.get_text()
-        try:
-            datetime.datetime.strptime(string.strip(), TFMT)
-            entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,
-                                        Gtk.STOCK_APPLY)
-        except ValueError:
-            entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,
-                                        Gtk.STOCK_DIALOG_ERROR)
-        self._isready()
-
-    def _isready(self):
-        get_icon = lambda x : self.d[x].get_icon_stock(Gtk.EntryIconPosition.PRIMARY)
-        if (Gtk.STOCK_APPLY == get_icon('desc') and
-            Gtk.STOCK_APPLY == get_icon('coel') and
-            Gtk.STOCK_APPLY == get_icon('brain') ):
-            self.b.set_sensitive(True)
-        else:
-            self.b.set_sensitive(False)
-
-    def on_button(self, switch, *args):
-        M = {}
-        # get all
-        d = datetime.datetime.strptime(self.d['date'].get_text(), TFMT+':%S')
-        M['description'] = self.d['desc'].get_text()
-        tree_iter = self.d['geno'].get_active_iter()
-        model = self.d['geno'].get_model()
-        M['genotype'] = model[tree_iter][0]
-        M['flyage'] = self.d['aged'].get_value()
-        d = datetime.datetime.strptime(self.d['coel'].get_text(), TFMT)
-        d = datetime.datetime.strptime(self.d['brain'].get_text(), TFMT)
-        # construct msg
-        print M
-        print msg
-
-
-    def update_date(self, *args):
-        #now = datetime.datetime.strftime(
-        #        datetime.datetime.fromtimestamp(rospy.rostime.get_time()), TFMT+':%S')
-        #self.d['date'].set_text(now)
-        return True
 
     def start(self):
-        GLib.timeout_add(100, self.update_date)                
         Gtk.main()
-
-    def set_genotypes(self, l):
-        s = Gtk.ListStore(str)
-        for i,g in enumerate(l):
-            s.append([g])
-            print g
-        self.d['geno'].set_model(s)
-        self.d['geno'].set_active(0)
-        cell = Gtk.CellRendererText()
-        self.d['geno'].pack_start(cell, True)
-        self.d['geno'].add_attribute(cell, "text", 0)
-
 
 
 if __name__ == "__main__":

@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkListStore" id="liststore1">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Stock</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Cross</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkWindow" id="window1">
     <property name="can_focus">False</property>
     <child>
@@ -31,6 +45,15 @@
               <object class="GtkComboBox" id="tubetypecbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="model">liststore1</property>
+                <property name="id_column">0</property>
+                <property name="active_id">0</property>
+                <child>
+                  <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                  <attributes>
+                    <attribute name="text">0</attribute>
+                  </attributes>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -62,12 +85,12 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
               <object class="GtkButton" id="nowbutton">
-                <property name="label" translatable="yes">button</property>
+                <property name="label" translatable="yes">now</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
