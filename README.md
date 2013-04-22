@@ -12,7 +12,7 @@ it's working!
 * [done] get abstraction layer for new google calendar api (v3) up and running
 * [done] add reminders!
 * [done] write gtk3 app
-* fine tune ./flyflipgtk3/\_flyflipapp.py/Gtk3FlyFlipFlapp.addflyevent
+* [done asked Karin :)]fine tune ./flyflipgtk3/\_flyflipapp.py/Gtk3FlyFlipFlapp.addflyevent
 * move reminders to a second calendar!
 * write android app for simple flystock managing
 

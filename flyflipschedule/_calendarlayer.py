@@ -129,12 +129,12 @@ class GCalendar(object):
                 # should hatch after 10 days
                 end = start + datetime.timedelta(days=14)
                 flip = start + datetime.timedelta(days=1)
-                vc = start + datetime.timedelta(days=12, hours=23)
+                vc = start + datetime.timedelta(days=13, hours=23)
             elif temperature == 18:
                 # should hatch after 20 days
-                end = start + datetime.timedelta(days=24)
+                end = start + datetime.timedelta(days=22)
                 flip = start + datetime.timedelta(days=1)
-                vc = start + datetime.timedelta(days=24, hours=23)
+                vc = start + datetime.timedelta(days=21, hours=23)
             else:
                 raise Exception('unkown temperature')
             # Cross event
@@ -169,7 +169,11 @@ class GCalendar(object):
                                                {'method' : 'email',
                                                 'minutes': 63*60, }, # day 12
                                                {'method' : 'email',
-                                                'minutes': 87*60, }, # day 11
+                                                'minutes': 87*60, }, # day 10
+                                               {'method' : 'email',
+                                                'minutes': 101*60, }, # day 09
+                                               {'method' : 'email',
+                                                'minutes': 125*60, }, # day 08
                                               ],
                               },
                     }
@@ -194,9 +198,5 @@ class GCalendar(object):
                                          body=event).execute()
         else:
             raise Exception('type needs to be stock or cross')
-
-
-
-
 
 
